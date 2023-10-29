@@ -1,3 +1,13 @@
 
+# python compiled
+__pycache__
+
 # ROM
-*.gb
+**.gb
+**.ram
+**.state
+
+# Generated sources
+**.png
+**.jpeg
+
