@@ -8,6 +8,4 @@ __pycache__
 **.state
 
 # Generated sources
-**.png
-**.jpeg
-
+src/resources/screenshots
