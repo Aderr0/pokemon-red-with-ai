@@ -1,12 +1,12 @@
 
-from os import listdir
+from os import listdir, rename
 from datetime import datetime
 from io import BufferedIOBase
+import time
 from pyboy import PyBoy, WindowEvent
 from PIL import Image
 
 from src.constants import Constants
-from src.enums import GameMode
 from src.log import get_logger
 
 
@@ -44,35 +44,6 @@ class Pyboy:
         except FileNotFoundError:
             print(f"Error: ROM '{rom_path}' not found.")
 
-    def run(self, mode: GameMode = GameMode.NORMAL) -> None:
-        """Run the game in the specified mode.
-
-        This method runs the game in the specified mode where the mode can be NORMAL or AI_TRAINING.
-        NORMAL mode is the default mode and runs the game in real-time.
-        AI_TRAINING mode is used to train the AI.
-
-        Parameters
-        ----------
-        mode : GameMode, optional
-            The mode to run the game in, by default GameMode.NORMAL
-        """
-
-        if mode == GameMode.AI_TRAINING:
-            pass
-        elif mode == GameMode.NORMAL:
-            self.start_game_in_real_time()
-
-    def start_game_in_real_time(self) -> None:
-            self.logger.debug("Starting game in real-time...")
-            self.load_state()
-            self.show_commands()
-
-            try:
-                while self.tick():
-                    pass
-            except KeyboardInterrupt:
-                self.close(save=True)
-
     def tick(self) -> bool:
         """Increment the tick count and run the tick.
 
@@ -107,7 +78,7 @@ class Pyboy:
         with open(Constants.STATES_FILE_PATH.format(state_name=state_file_name), "wb") as state_file:
             self.game.save_state(state_file)
 
-    def close(self, save=False) -> None:
+    def stop(self, save=False) -> None:
         """Close the game.
 
         Parameters
@@ -115,11 +86,14 @@ class Pyboy:
         save : bool, optional
             Whether to save the game, by default False
         """
-        self.logger.debug("Closing game...")
-        self.game.stop(save)
+        self.game.stop(save=save)
+
         if save:
-            new_state_file_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            os.rename(Constants.ROM_PATH + Constants.ROME_FILE_NAME + ".state", Constants.STATES_FILE_PATH + new_state_file_name + ".state")
+            try:
+                new_state_file_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                rename(Constants.ROM_FILE_PATH + ".state", Constants.STATES_FILE_PATH.format(state_name=new_state_file_name))
+            except FileNotFoundError:
+                self.logger.exception(f"Error: State file {Constants.ROM_FILE_PATH + '.state'} not found.")
 
     def load_state(self) -> None:
         """Load a state file.

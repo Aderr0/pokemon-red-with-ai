@@ -1,11 +1,18 @@
+
 from src.pyboy import Pyboy
+from src.game import Game
+from src.enums import GameMode
+from src.log import get_logger
+
+logger = get_logger(__name__)
 
 if __name__.__eq__("__main__"):
     try:
-        game = Pyboy(sound=True)
+        emulator = Pyboy(sound=True)
+        game = Game(emulator, GameMode.NORMAL)
+
         game.run()
     except KeyboardInterrupt:
-        game.close()
+        game.close(save=True)
     except Exception as e:
-        print(e)
-        game.close()
+        logger.exception(e)
